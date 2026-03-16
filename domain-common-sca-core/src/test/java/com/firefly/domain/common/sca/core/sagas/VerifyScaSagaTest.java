@@ -61,11 +61,11 @@ class VerifyScaSagaTest {
         SCAOperationDTO updatedOp = new SCAOperationDTO().status(SCAOperationDTO.StatusEnum.VERIFIED);
         SCAAuditDTO audit = new SCAAuditDTO().eventType(SCAAuditDTO.EventTypeEnum.VERIFIED);
 
-        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class)))
+        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class), any()))
                 .thenReturn(Mono.just(attempt));
-        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class)))
+        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.just(updatedOp));
-        when(scaAuditApi.createAuditEvent(any(), any(SCAAuditDTO.class)))
+        when(scaAuditApi.createAuditEvent(any(), any(SCAAuditDTO.class), any()))
                 .thenReturn(Mono.just(audit));
 
         VerifyScaAttemptCommand command = new VerifyScaAttemptCommand(operationId, challengeId, "123456");
@@ -89,11 +89,11 @@ class VerifyScaSagaTest {
                 .attemptValue("000000")
                 .success(false);
 
-        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class)))
+        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class), any()))
                 .thenReturn(Mono.just(attempt));
-        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class)))
+        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.error(new RuntimeException("status update failed")));
-        when(scaAttemptApi.updateAttempt(any(), any(), any(), any(SCAAttemptDTO.class)))
+        when(scaAttemptApi.updateAttempt(any(), any(), any(), any(SCAAttemptDTO.class), any()))
                 .thenReturn(Mono.just(new SCAAttemptDTO().success(false)));
 
         VerifyScaAttemptCommand command = new VerifyScaAttemptCommand(operationId, challengeId, "000000");

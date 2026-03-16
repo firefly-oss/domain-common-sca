@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +37,7 @@ class GetScaStatusHistoryHandlerTest {
         PaginationResponseSCAOperationHistoryDTO historyPage = new PaginationResponseSCAOperationHistoryDTO()
                 .totalElements(2L);
 
-        when(scaHistoryApi.getAllHistory(operationId, 0, 20, "eventTime", "DESC"))
+        when(scaHistoryApi.getAllHistory(operationId, 0, 20, "eventTime", "DESC", any()))
                 .thenReturn(Mono.just(historyPage));
 
         StepVerifier.create(handler.doHandle(query))
@@ -49,7 +50,7 @@ class GetScaStatusHistoryHandlerTest {
         UUID operationId = UUID.randomUUID();
         GetScaStatusHistoryQuery query = new GetScaStatusHistoryQuery(operationId);
 
-        when(scaHistoryApi.getAllHistory(operationId, 0, 20, "eventTime", "DESC"))
+        when(scaHistoryApi.getAllHistory(operationId, 0, 20, "eventTime", "DESC", any()))
                 .thenReturn(Mono.error(new RuntimeException("history unavailable")));
 
         StepVerifier.create(handler.doHandle(query))

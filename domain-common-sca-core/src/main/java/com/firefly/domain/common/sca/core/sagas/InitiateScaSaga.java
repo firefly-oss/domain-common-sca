@@ -13,6 +13,7 @@ import org.fireflyframework.orchestration.saga.annotation.Saga;
 import org.fireflyframework.orchestration.saga.annotation.SagaStep;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Orchestrates the full SCA initiation flow: create operation → generate challenge → send challenge.
@@ -58,7 +59,7 @@ public class InitiateScaSaga {
                 .referenceId(command.getChannel())
                 .status(SCAOperationDTO.StatusEnum.PENDING);
 
-        return scaOperationApi.createOperation(dto);
+        return scaOperationApi.createOperation(dto, UUID.randomUUID().toString());
     }
 
     @SagaStep(id = STEP_GENERATE_CHALLENGE, dependsOn = STEP_CREATE_OPERATION, retry = 2)
@@ -69,14 +70,14 @@ public class InitiateScaSaga {
         SCAChallengeDTO dto = new SCAChallengeDTO()
                 .scaOperationId(operation.getId());
 
-        return scaChallengeApi.createChallenge(operation.getId(), dto);
+        return scaChallengeApi.createChallenge(operation.getId(), dto, UUID.randomUUID().toString());
     }
 
     @SagaStep(id = STEP_SEND_CHALLENGE, dependsOn = STEP_GENERATE_CHALLENGE)
     public Mono<String> sendChallenge(@Variable(CTX_OPERATION_ID) SCAOperationDTO operation) {
         log.debug("Triggering SCA challenge delivery for operationId={}", operation.getId());
 
-        return scaOperationApi.triggerSCA(operation.getId())
+        return scaOperationApi.triggerSCA(operation.getId(), UUID.randomUUID().toString())
                 .thenReturn("triggered");
     }
 
@@ -89,7 +90,7 @@ public class InitiateScaSaga {
         SCAOperationDTO cancelDto = new SCAOperationDTO()
                 .status(SCAOperationDTO.StatusEnum.CANCELLED);
 
-        return scaOperationApi.updateOperation(operation.getId(), cancelDto)
+        return scaOperationApi.updateOperation(operation.getId(), cancelDto, UUID.randomUUID().toString())
                 .then();
     }
 }

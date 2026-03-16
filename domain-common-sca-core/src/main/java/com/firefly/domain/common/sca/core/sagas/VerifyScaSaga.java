@@ -66,7 +66,8 @@ public class VerifyScaSaga {
         return scaAttemptApi.createAttempt(
                 command.getOperationId(),
                 command.getChallengeId(),
-                dto
+                dto,
+                null
         ).doOnNext(attempt -> {
             ctx.putVariable(CTX_ATTEMPT_ID, attempt);
             ctx.putVariable(CTX_OPERATION_ID, command.getOperationId());
@@ -88,7 +89,8 @@ public class VerifyScaSaga {
 
         return scaOperationApi.updateOperation(
                 operationId,
-                dto
+                dto,
+                null
         );
     }
 
@@ -109,7 +111,8 @@ public class VerifyScaSaga {
 
         return scaAuditApi.createAuditEvent(
                 operationId,
-                dto
+                dto,
+                null
         );
     }
 
@@ -131,7 +134,8 @@ public class VerifyScaSaga {
                 operationId,
                 challengeId,
                 attempt.getId(),
-                failedDto
+                failedDto,
+                null
         ).then();
     }
 }

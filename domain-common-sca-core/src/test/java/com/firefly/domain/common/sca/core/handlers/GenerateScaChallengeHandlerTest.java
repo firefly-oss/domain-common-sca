@@ -37,7 +37,7 @@ class GenerateScaChallengeHandlerTest {
         GenerateScaChallengeCommand command = new GenerateScaChallengeCommand(operationId, ChallengeType.OTP);
 
         SCAChallengeDTO expectedChallenge = new SCAChallengeDTO().scaOperationId(operationId);
-        when(scaChallengeApi.createChallenge(eq(operationId), any(SCAChallengeDTO.class)))
+        when(scaChallengeApi.createChallenge(eq(operationId), any(SCAChallengeDTO.class), any()))
                 .thenReturn(Mono.just(expectedChallenge));
 
         StepVerifier.create(handler.doHandle(command))
@@ -50,7 +50,7 @@ class GenerateScaChallengeHandlerTest {
         UUID operationId = UUID.randomUUID();
         GenerateScaChallengeCommand command = new GenerateScaChallengeCommand(operationId, ChallengeType.PUSH);
 
-        when(scaChallengeApi.createChallenge(eq(operationId), any(SCAChallengeDTO.class)))
+        when(scaChallengeApi.createChallenge(eq(operationId), any(SCAChallengeDTO.class), any()))
                 .thenReturn(Mono.error(new RuntimeException("api error")));
 
         StepVerifier.create(handler.doHandle(command))

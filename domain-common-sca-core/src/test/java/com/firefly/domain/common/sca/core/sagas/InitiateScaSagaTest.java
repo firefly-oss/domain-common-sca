@@ -59,11 +59,11 @@ class InitiateScaSagaTest {
         SCAChallengeDTO createdChallenge = new SCAChallengeDTO()
                 .scaOperationId(operationId);
 
-        when(scaOperationApi.createOperation(any(SCAOperationDTO.class)))
+        when(scaOperationApi.createOperation(any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.just(createdOperation));
-        when(scaChallengeApi.createChallenge(any(), any(SCAChallengeDTO.class)))
+        when(scaChallengeApi.createChallenge(any(), any(SCAChallengeDTO.class), any()))
                 .thenReturn(Mono.just(createdChallenge));
-        when(scaOperationApi.triggerSCA(any()))
+        when(scaOperationApi.triggerSCA(any(), any()))
                 .thenReturn(Mono.empty());
 
         InitiateScaOperationCommand command = new InitiateScaOperationCommand("LOGIN", UUID.randomUUID(), "MOBILE");
@@ -84,11 +84,11 @@ class InitiateScaSagaTest {
         SCAOperationDTO createdOperation = new SCAOperationDTO()
                 .status(SCAOperationDTO.StatusEnum.PENDING);
 
-        when(scaOperationApi.createOperation(any(SCAOperationDTO.class)))
+        when(scaOperationApi.createOperation(any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.just(createdOperation));
-        when(scaChallengeApi.createChallenge(any(), any(SCAChallengeDTO.class)))
+        when(scaChallengeApi.createChallenge(any(), any(SCAChallengeDTO.class), any()))
                 .thenReturn(Mono.error(new RuntimeException("challenge service unavailable")));
-        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class)))
+        when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.just(new SCAOperationDTO().status(SCAOperationDTO.StatusEnum.CANCELLED)));
 
         InitiateScaOperationCommand command = new InitiateScaOperationCommand("TRANSFER", UUID.randomUUID(), "WEB");

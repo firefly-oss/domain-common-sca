@@ -48,9 +48,9 @@ class GetScaAttemptsHandlerTest {
 
         PaginationResponseSCAAttemptDTO attemptsPage = new PaginationResponseSCAAttemptDTO();
 
-        when(scaChallengeApi.getAllChallenges(eq(operationId), eq(0), eq(1), eq("createdAt"), eq("DESC")))
+        when(scaChallengeApi.getAllChallenges(eq(operationId), eq(0), eq(1), eq("createdAt"), eq("DESC"), any()))
                 .thenReturn(Mono.just(challengesPage));
-        when(scaAttemptApi.getAllAttempts(eq(operationId), any(), eq(0), eq(10), isNull(), isNull()))
+        when(scaAttemptApi.getAllAttempts(eq(operationId), any(), eq(0), eq(10), isNull(), isNull(), any()))
                 .thenReturn(Mono.just(attemptsPage));
 
         StepVerifier.create(handler.doHandle(query))
@@ -66,7 +66,7 @@ class GetScaAttemptsHandlerTest {
         PaginationResponseSCAChallengeDTO emptyChallenges = new PaginationResponseSCAChallengeDTO()
                 .content(List.of());
 
-        when(scaChallengeApi.getAllChallenges(eq(operationId), eq(0), eq(1), eq("createdAt"), eq("DESC")))
+        when(scaChallengeApi.getAllChallenges(eq(operationId), eq(0), eq(1), eq("createdAt"), eq("DESC"), any()))
                 .thenReturn(Mono.just(emptyChallenges));
 
         StepVerifier.create(handler.doHandle(query))

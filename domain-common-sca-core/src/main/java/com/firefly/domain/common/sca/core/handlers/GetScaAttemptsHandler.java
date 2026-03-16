@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
 import org.fireflyframework.cqrs.query.QueryHandler;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Handles {@link GetScaAttemptsQuery} by resolving the latest challenge for the operation
@@ -31,7 +32,7 @@ public class GetScaAttemptsHandler extends QueryHandler<GetScaAttemptsQuery, Pag
     protected Mono<PaginationResponseSCAAttemptDTO> doHandle(GetScaAttemptsQuery query) {
         log.debug("Fetching SCA attempts for operationId={}", query.getOperationId());
 
-        return scaChallengeApi.getAllChallenges(query.getOperationId(), 0, 1, "createdAt", "DESC")
+        return scaChallengeApi.getAllChallenges(query.getOperationId(), 0, 1, "createdAt", "DESC", UUID.randomUUID().toString())
                 .flatMap(challenges -> {
                     if (challenges == null
                             || challenges.getContent() == null
@@ -40,7 +41,7 @@ public class GetScaAttemptsHandler extends QueryHandler<GetScaAttemptsQuery, Pag
                     }
                     SCAChallengeDTO latest = challenges.getContent().get(0);
                     return scaAttemptApi.getAllAttempts(
-                            query.getOperationId(), latest.getId(), 0, 10, null, null
+                            query.getOperationId(), latest.getId(), 0, 10, null, null, null
                     );
                 });
     }

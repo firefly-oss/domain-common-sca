@@ -31,7 +31,8 @@ public class GenerateScaChallengeHandler extends CommandHandler<GenerateScaChall
 
         return scaChallengeApi.createChallenge(
                 command.getOperationId(),
-                dto
+                dto,
+                null
         );
     }
 }

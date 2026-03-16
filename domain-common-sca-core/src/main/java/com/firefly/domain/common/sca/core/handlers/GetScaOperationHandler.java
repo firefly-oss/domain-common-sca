@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
 import org.fireflyframework.cqrs.query.QueryHandler;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Handles {@link GetScaOperationQuery} by fetching the operation from the SCA management API.
@@ -25,6 +26,6 @@ public class GetScaOperationHandler extends QueryHandler<GetScaOperationQuery, S
     protected Mono<SCAOperationDTO> doHandle(GetScaOperationQuery query) {
         log.debug("Fetching SCA operation operationId={}", query.getOperationId());
 
-        return scaOperationApi.getOperation(query.getOperationId());
+        return scaOperationApi.getOperation(query.getOperationId(), UUID.randomUUID().toString());
     }
 }

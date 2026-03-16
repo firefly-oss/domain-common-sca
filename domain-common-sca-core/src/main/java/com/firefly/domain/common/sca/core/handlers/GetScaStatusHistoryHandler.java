@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.fireflyframework.cqrs.annotations.QueryHandlerComponent;
 import org.fireflyframework.cqrs.query.QueryHandler;
 import reactor.core.publisher.Mono;
+import java.util.UUID;
 
 /**
  * Handles {@link GetScaStatusHistoryQuery} by fetching the operation status-change history.
@@ -25,6 +26,6 @@ public class GetScaStatusHistoryHandler extends QueryHandler<GetScaStatusHistory
     protected Mono<PaginationResponseSCAOperationHistoryDTO> doHandle(GetScaStatusHistoryQuery query) {
         log.debug("Fetching status history for operationId={}", query.getOperationId());
 
-        return scaHistoryApi.getAllHistory(query.getOperationId(), 0, 20, "eventTime", "DESC");
+        return scaHistoryApi.getAllHistory(query.getOperationId(), 0, 20, "eventTime", "DESC", UUID.randomUUID().toString());
     }
 }
