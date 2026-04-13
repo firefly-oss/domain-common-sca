@@ -109,7 +109,7 @@
                             <!-- Skip until the web module has been built with the generate-openapi profile -->
                             <skip>true</skip>
                             <!-- Use the OpenAPI spec from the running web application -->
-                            <inputSpec>${project.parent.basedir}/${project.parent.artifactId}-web/target/openapi/openapi.yml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi.yml</inputSpec>
                             <generatorName>java</generatorName>
                             <library>webclient</library>
                             <output>${generated-sources-dir}</output>
