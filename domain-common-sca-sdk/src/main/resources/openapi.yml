@@ -1,0 +1,409 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:18080
+  description: Generated server url
+tags:
+- name: SCA Operations
+  description: APIs for managing Strong Customer Authentication operations
+paths:
+  /api/v1/sca/operations/{operationId}/verify:
+    post:
+      tags:
+      - SCA Operations
+      summary: Verify SCA Attempt
+      description: "Verifies a user's SCA attempt, updates the operation status, and\
+        \ records an audit event."
+      operationId: verifyAttempt
+      parameters:
+      - name: operationId
+        in: path
+        description: Unique identifier of the SCA operation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyAttemptRequest"
+        required: true
+      responses:
+        "200":
+          description: Attempt verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SagaResult"
+        "400":
+          description: Invalid request body
+        "404":
+          description: SCA operation not found
+  /api/v1/sca/operations/{operationId}/challenge:
+    post:
+      tags:
+      - SCA Operations
+      summary: Generate Challenge
+      description: Generates or regenerates a challenge for an existing SCA operation.
+      operationId: generateChallenge
+      parameters:
+      - name: operationId
+        in: path
+        description: Unique identifier of the SCA operation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateChallengeRequest"
+        required: true
+      responses:
+        "201":
+          description: Challenge generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SCAChallengeDTO"
+        "400":
+          description: Invalid request body
+        "404":
+          description: SCA operation not found
+  /api/v1/sca/operations:
+    post:
+      tags:
+      - SCA Operations
+      summary: Initiate SCA Operation
+      description: Initiates a new SCA operation and generates and delivers its first
+        challenge.
+      operationId: initiateOperation
+      parameters:
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InitiateScaOperationRequest"
+        required: true
+      responses:
+        "201":
+          description: SCA operation initiated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SagaResult"
+        "400":
+          description: Invalid request body
+  /api/v1/sca/operations/{operationId}/status-history:
+    get:
+      tags:
+      - SCA Operations
+      summary: Get Status History
+      description: Retrieves the status-change history for the given SCA operation.
+      operationId: getStatusHistory
+      parameters:
+      - name: operationId
+        in: path
+        description: Unique identifier of the SCA operation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Status history retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginationResponseSCAOperationHistoryDTO"
+        "404":
+          description: SCA operation not found
+  /api/v1/sca/operations/{operationId}/attempts:
+    get:
+      tags:
+      - SCA Operations
+      summary: Get SCA Attempts
+      description: Retrieves all attempts for the latest challenge on the given SCA
+        operation.
+      operationId: getAttempts
+      parameters:
+      - name: operationId
+        in: path
+        description: Unique identifier of the SCA operation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Attempts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginationResponseSCAAttemptDTO"
+        "404":
+          description: SCA operation not found
+  /api/v1/sca/operations/{operationId}:
+    get:
+      tags:
+      - SCA Operations
+      summary: Get SCA Operation
+      description: Retrieves an existing SCA operation by its unique identifier.
+      operationId: getOperation
+      parameters:
+      - name: operationId
+        in: path
+        description: Unique identifier of the SCA operation
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: SCA operation retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SCAOperationDTO"
+        "404":
+          description: SCA operation not found
+components:
+  schemas:
+    VerifyAttemptRequest:
+      required:
+      - challengeId
+      - verificationCode
+      type: object
+      properties:
+        challengeId:
+          type: string
+          description: Unique identifier of the challenge being answered
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        verificationCode:
+          minLength: 1
+          type: string
+          description: Verification code submitted by the user
+          example: "123456"
+      description: Request to verify a user's SCA attempt
+    SagaResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+        failed:
+          type: boolean
+    GenerateChallengeRequest:
+      required:
+      - challengeType
+      type: object
+      properties:
+        challengeType:
+          type: string
+          description: Type of challenge to generate
+          example: OTP
+          enum:
+          - OTP
+          - PUSH
+          - BIOMETRIC
+      description: Request to generate a challenge for an existing SCA operation
+    SCAChallengeDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scaOperationId:
+          type: string
+          format: uuid
+        challengeCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        used:
+          type: boolean
+    InitiateScaOperationRequest:
+      required:
+      - channel
+      - operationType
+      - resourceId
+      type: object
+      properties:
+        operationType:
+          minLength: 1
+          type: string
+          description: "Type of operation requiring SCA (e.g. LOGIN, TRANSFER, PAYMENT)"
+          example: TRANSFER
+        resourceId:
+          type: string
+          description: Unique identifier of the resource being protected
+          format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        channel:
+          minLength: 1
+          type: string
+          description: "Channel through which the operation is performed (e.g. MOBILE,\
+            \ WEB)"
+          example: MOBILE
+      description: Request to initiate a new SCA operation
+    PaginationResponseSCAOperationHistoryDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SCAOperationHistoryDTO"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32
+    SCAOperationHistoryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scaOperationId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - FAILED
+          - EXPIRED
+          - CANCELLED
+        eventTime:
+          type: string
+          format: date-time
+        comments:
+          type: string
+    PaginationResponseSCAAttemptDTO:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/SCAAttemptDTO"
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32
+    SCAAttemptDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scaChallengeId:
+          type: string
+          format: uuid
+        attemptValue:
+          type: string
+        attemptedAt:
+          type: string
+          format: date-time
+        success:
+          type: boolean
+        ipAddress:
+          type: string
+    SCAOperationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        referenceId:
+          type: string
+        operationType:
+          type: string
+          enum:
+          - TRANSFER
+          - PASSWORD_CHANGE
+          - LOGIN
+          - LOAN_REQUEST
+          - ONBOARDING
+          - OTHER
+        partyId:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - VERIFIED
+          - FAILED
+          - EXPIRED
+          - CANCELLED
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        lastUpdated:
+          type: string
+          format: date-time
+        cancelledAt:
+          type: string
+          format: date-time
