@@ -41,7 +41,7 @@ firefly:
 
 api-configuration:
   core-platform.sca-mgmt:
-    base-path: http://localhost:8040
+    base-path: ${ENDPOINT_CORE_PLATFORM_SCA_MGMT:http://localhost:8040}
 
 server:
   address: ${SERVER_ADDRESS:localhost}
