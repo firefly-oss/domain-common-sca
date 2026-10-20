@@ -58,7 +58,7 @@ springdoc:
     operationsSorter: method
     docExpansion: none
     filter: true
-  packages-to-scan: com.firefly.domain.common.sca.web.controllers
+  packages-to-scan: io.fireflysoftware.domain.common.sca.web.controllers
   paths-to-match: /api/**
 
 management:
@@ -90,7 +90,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.firefly: DEBUG
+    io.fireflysoftware: DEBUG
 
 ---
 spring:
@@ -101,7 +101,7 @@ spring:
 logging:
   level:
     root: INFO
-    com.firefly: DEBUG
+    io.fireflysoftware: DEBUG
 
 springdoc:
   api-docs:
@@ -118,7 +118,7 @@ spring:
 logging:
   level:
     root: WARN
-    com.firefly: INFO
+    io.fireflysoftware: INFO
     org.springframework: WARN
 
 springdoc:

@@ -160,7 +160,7 @@ If `updateStatus` or `recordAudit` fails, `compensateValidateAttempt` is invoked
 
 | SDK / Artifact | Purpose |
 |----------------|---------|
-| `core-common-sca-mgmt-sdk` (`com.firefly`) | The primary downstream dependency. Provides five API clients instantiated by `ScaMgmtClientFactory`: `ScaOperationControllerApi` (create, update, trigger, get operations), `ScaChallengeControllerApi` (create and list challenges), `ScaAttemptControllerApi` (create, update, list attempts), `ScaOperationHistoryControllerApi` (list status-change history), and `ScaAuditControllerApi` (create audit events). |
+| `core-common-sca-mgmt-sdk` (`io.fireflysoftware`) | The primary downstream dependency. Provides five API clients instantiated by `ScaMgmtClientFactory`: `ScaOperationControllerApi` (create, update, trigger, get operations), `ScaChallengeControllerApi` (create and list challenges), `ScaAttemptControllerApi` (create, update, list attempts), `ScaOperationHistoryControllerApi` (list status-change history), and `ScaAuditControllerApi` (create audit events). |
 | `fireflyframework-starter-domain` | Provides the CQRS infrastructure (`CommandBus`, `QueryBus`, `CommandHandler`, `QueryHandler`) and the Saga Orchestration engine (`SagaEngine`, `@Saga`, `@SagaStep`, `SagaResult`). |
 | `fireflyframework-web` | Shared web utilities, exception handling, and common Spring WebFlux configuration for domain-layer services. |
 | `fireflyframework-utils` / `fireflyframework-validators` | Cross-cutting utility classes and custom Bean Validation constraints used across modules. |
@@ -202,9 +202,9 @@ All properties are defined in `domain-common-sca-web/src/main/resources/applicat
 
 | Profile | Logging behaviour | API docs |
 |---------|-------------------|----------|
-| `dev` | `com.firefly` at `DEBUG`, root at `INFO` | Enabled |
-| `testing` | `com.firefly` at `DEBUG`, root at `INFO` | Enabled |
-| `prod` | `com.firefly` at `INFO`, root and Spring at `WARN` | Disabled |
+| `dev` | `io.fireflysoftware` at `DEBUG`, root at `INFO` | Enabled |
+| `testing` | `io.fireflysoftware` at `DEBUG`, root at `INFO` | Enabled |
+| `prod` | `io.fireflysoftware` at `INFO`, root and Spring at `WARN` | Disabled |
 
 ## Running Locally
 
