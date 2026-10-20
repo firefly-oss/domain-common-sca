@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>domain-common-sca-core</artifactId>
+    <name>domain-common-sca-core</name>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>

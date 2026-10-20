@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>domain-common-sca</artifactId>
+    <name>domain-common-sca</name>
     <version>26.10.3</version>
     <packaging>pom</packaging>
 

@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>domain-common-sca-web</artifactId>
+    <name>domain-common-sca-web</name>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>

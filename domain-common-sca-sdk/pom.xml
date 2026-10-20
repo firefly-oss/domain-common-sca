@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>domain-common-sca-sdk</artifactId>
+    <name>domain-common-sca-sdk</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
