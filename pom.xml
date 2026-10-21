@@ -7,13 +7,13 @@
     <parent>
         <groupId>io.fireflysoftware</groupId>
         <artifactId>firefly-parent</artifactId>
-        <version>26.10.3</version>
+        <version>26.10.4</version>
         <relativePath/>
     </parent>
 
     <artifactId>domain-common-sca</artifactId>
     <name>domain-common-sca</name>
-    <version>26.10.3</version>
+    <version>26.10.4</version>
     <packaging>pom</packaging>
 
     <modules>

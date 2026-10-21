@@ -78,8 +78,14 @@ class VerifyScaSagaTest {
         SCAOperationDTO updatedOp = new SCAOperationDTO().status(SCAOperationDTO.StatusEnum.VERIFIED);
         SCAAuditDTO audit = new SCAAuditDTO().eventType(SCAAuditDTO.EventTypeEnum.VERIFIED);
 
-        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class), any()))
-                .thenReturn(Mono.just(attempt));
+        when(scaChallengeApi.validateChallenge(any(), any(), any(), any()))
+                .thenReturn(Mono.just("Challenge Validated"));
+        when(scaOperationApi.getOperation(any(), any()))
+                .thenReturn(Mono.just(new SCAOperationDTO()
+                        .referenceId(operationId.toString())
+                        .operationType(SCAOperationDTO.OperationTypeEnum.LOGIN)
+                        .partyId(challengeId.toString())
+                        .status(SCAOperationDTO.StatusEnum.PENDING)));
         when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.just(updatedOp));
         when(scaAuditApi.createAuditEvent(any(), any(SCAAuditDTO.class), any()))
@@ -106,8 +112,14 @@ class VerifyScaSagaTest {
                 .attemptValue("000000")
                 .success(false);
 
-        when(scaAttemptApi.createAttempt(any(), any(), any(SCAAttemptDTO.class), any()))
-                .thenReturn(Mono.just(attempt));
+        when(scaChallengeApi.validateChallenge(any(), any(), any(), any()))
+                .thenReturn(Mono.just("Challenge Validated"));
+        when(scaOperationApi.getOperation(any(), any()))
+                .thenReturn(Mono.just(new SCAOperationDTO()
+                        .referenceId(operationId.toString())
+                        .operationType(SCAOperationDTO.OperationTypeEnum.LOGIN)
+                        .partyId(challengeId.toString())
+                        .status(SCAOperationDTO.StatusEnum.PENDING)));
         when(scaOperationApi.updateOperation(any(), any(SCAOperationDTO.class), any()))
                 .thenReturn(Mono.error(new RuntimeException("status update failed")));
         when(scaAttemptApi.updateAttempt(any(), any(), any(), any(SCAAttemptDTO.class), any()))

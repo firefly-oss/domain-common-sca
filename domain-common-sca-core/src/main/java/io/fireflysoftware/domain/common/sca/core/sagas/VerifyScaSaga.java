@@ -19,6 +19,7 @@ package io.fireflysoftware.domain.common.sca.core.sagas;
 
 import io.fireflysoftware.common.sca.sdk.api.ScaAuditControllerApi;
 import io.fireflysoftware.common.sca.sdk.api.ScaAttemptControllerApi;
+import io.fireflysoftware.common.sca.sdk.api.ScaChallengeControllerApi;
 import io.fireflysoftware.common.sca.sdk.api.ScaOperationControllerApi;
 import io.fireflysoftware.common.sca.sdk.model.SCAAuditDTO;
 import io.fireflysoftware.common.sca.sdk.model.SCAAttemptDTO;
@@ -60,13 +61,16 @@ public class VerifyScaSaga {
     static final String CTX_CHALLENGE_ID = "CTX_CHALLENGE_ID";
 
     private final ScaAttemptControllerApi scaAttemptApi;
+    private final ScaChallengeControllerApi scaChallengeApi;
     private final ScaOperationControllerApi scaOperationApi;
     private final ScaAuditControllerApi scaAuditApi;
 
     public VerifyScaSaga(ScaAttemptControllerApi scaAttemptApi,
+                         ScaChallengeControllerApi scaChallengeApi,
                          ScaOperationControllerApi scaOperationApi,
                          ScaAuditControllerApi scaAuditApi) {
         this.scaAttemptApi = scaAttemptApi;
+        this.scaChallengeApi = scaChallengeApi;
         this.scaOperationApi = scaOperationApi;
         this.scaAuditApi = scaAuditApi;
     }
@@ -78,14 +82,14 @@ public class VerifyScaSaga {
         SCAAttemptDTO dto = new SCAAttemptDTO()
                 .scaChallengeId(command.getChallengeId())
                 .attemptValue(command.getVerificationCode())
-                .success(false);
+                .success(true);
 
-        return scaAttemptApi.createAttempt(
+        return scaChallengeApi.validateChallenge(
                 command.getOperationId(),
                 command.getChallengeId(),
-                dto,
-                null
-        ).doOnNext(attempt -> {
+                command.getVerificationCode(),
+                command.getOperationId() + ":validate"
+        ).thenReturn(dto).doOnNext(attempt -> {
             ctx.putVariable(CTX_ATTEMPT_ID, attempt);
             ctx.putVariable(CTX_OPERATION_ID, command.getOperationId());
             ctx.putVariable(CTX_CHALLENGE_ID, command.getChallengeId());
@@ -102,13 +106,11 @@ public class VerifyScaSaga {
                 ? SCAOperationDTO.StatusEnum.VERIFIED
                 : SCAOperationDTO.StatusEnum.FAILED;
 
-        SCAOperationDTO dto = new SCAOperationDTO().status(newStatus);
-
-        return scaOperationApi.updateOperation(
-                operationId,
-                dto,
-                null
-        );
+        return scaOperationApi.getOperation(operationId, operationId + ":read")
+                .flatMap(existing -> scaOperationApi.updateOperation(
+                        operationId,
+                        existing.status(newStatus),
+                        operationId + ":status"));
     }
 
     @SagaStep(id = STEP_RECORD_AUDIT, dependsOn = STEP_UPDATE_STATUS)
@@ -140,6 +142,9 @@ public class VerifyScaSaga {
         SCAAttemptDTO attempt = ctx.getVariableAs(CTX_ATTEMPT_ID, SCAAttemptDTO.class);
         UUID operationId = ctx.getVariableAs(CTX_OPERATION_ID, UUID.class);
         UUID challengeId = ctx.getVariableAs(CTX_CHALLENGE_ID, UUID.class);
+        if (attempt == null || attempt.getId() == null || operationId == null || challengeId == null) {
+            return Mono.empty();
+        }
         log.warn("Compensating: marking attempt={} as failed for operationId={}", attempt.getId(), operationId);
 
         SCAAttemptDTO failedDto = new SCAAttemptDTO()

@@ -44,7 +44,10 @@ public class GenerateScaChallengeHandler extends CommandHandler<GenerateScaChall
         log.debug("Generating challenge for operationId={} type={}", command.getOperationId(), command.getChallengeType());
 
         SCAChallengeDTO dto = new SCAChallengeDTO()
-                .scaOperationId(command.getOperationId());
+                .scaOperationId(command.getOperationId())
+                .challengeCode(Integer.toString(100000 + java.util.concurrent.ThreadLocalRandom.current().nextInt(900000)))
+                .expiresAt(java.time.LocalDateTime.now().plusMinutes(5).withNano(0))
+                .used(false);
 
         return scaChallengeApi.createChallenge(
                 command.getOperationId(),
