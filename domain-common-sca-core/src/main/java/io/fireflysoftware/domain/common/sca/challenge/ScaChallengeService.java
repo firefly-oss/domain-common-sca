@@ -16,59 +16,39 @@
 
 package io.fireflysoftware.domain.common.sca.challenge;
 
-import java.security.SecureRandom;
-import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Creates a challenge, delivers it through {@link ChallengeDeliveryPort}, and validates the response.
- * This is not a password or biometric login.
+ * Asks core-common-sca-mgmt to create and validate the challenge, then hands the core's code
+ * to {@link ChallengeDeliveryPort}. This service does not store challenges.
  */
 public final class ScaChallengeService {
 
+    private final CoreScaClient core;
     private final ChallengeDeliveryPort delivery;
-    private final SecureRandom random = new SecureRandom();
-    private final ConcurrentHashMap<UUID, Pending> pending = new ConcurrentHashMap<>();
 
-    public ScaChallengeService(ChallengeDeliveryPort delivery) {
+    public ScaChallengeService(CoreScaClient core, ChallengeDeliveryPort delivery) {
+        this.core = core;
         this.delivery = delivery;
     }
 
-    public ChallengeDeliveryPort.Delivery create(UUID paymentId) {
-        int code = 100000 + random.nextInt(900000);
-        String value = Integer.toString(code);
-        UUID challengeId = UUID.randomUUID();
-        pending.put(challengeId, new Pending(paymentId, value, Instant.now().plusSeconds(300), ChallengeStatus.PENDING));
-        return delivery.deliver(challengeId, value);
+    public Issued create(UUID paymentId, UUID partyId) {
+        CoreScaClient.CreatedChallenge created = core.create(paymentId, partyId);
+        ChallengeDeliveryPort.Delivery delivered = delivery.deliver(created.challengeId(), created.challengeCode());
+        return new Issued(created.operationId(), delivered.challengeId(), delivered.challengeValue());
     }
 
-    public ChallengeStatus validate(UUID challengeId, String response) {
-        Pending current = pending.get(challengeId);
-        if (current == null || Instant.now().isAfter(current.expiresAt())) {
-            if (current != null) {
-                pending.put(challengeId, current.withStatus(ChallengeStatus.EXPIRED));
-            }
-            return ChallengeStatus.EXPIRED;
-        }
-        if (response == null || !current.value().equals(response)) {
-            pending.put(challengeId, current.withStatus(ChallengeStatus.FAILED));
+    public ChallengeStatus validate(UUID operationId, UUID challengeId, String response) {
+        if ("sandbox".equals(response)) {
             return ChallengeStatus.FAILED;
         }
-        pending.put(challengeId, current.withStatus(ChallengeStatus.VALIDATED));
-        return ChallengeStatus.VALIDATED;
+        return core.validate(operationId, challengeId, response) ? ChallengeStatus.VALIDATED : ChallengeStatus.FAILED;
     }
 
-    public void expire(UUID challengeId) {
-        Pending current = pending.get(challengeId);
-        if (current != null) {
-            pending.put(challengeId, current.withStatus(ChallengeStatus.EXPIRED));
-        }
+    public void expire(UUID operationId, UUID challengeId) {
+        core.expire(operationId, challengeId);
     }
 
-    private record Pending(UUID paymentId, String value, Instant expiresAt, ChallengeStatus status) {
-        Pending withStatus(ChallengeStatus next) {
-            return new Pending(paymentId, value, expiresAt, next);
-        }
+    public record Issued(UUID operationId, UUID challengeId, String challengeValue) {
     }
 }
